@@ -866,7 +866,7 @@ class Client(object):
         defaults to read only (1)
         :param public_upload (optional): allows users to upload files or folders
         :param password (optional): sets a password
-        http://doc.owncloud.org/server/6.0/admin_manual/sharing_api/index.html
+        https://docs.nextcloud.com/server/latest/developer_manual/client_apis/OCS/ocs-share-api.html
         :param name (optional): display name for the link
         :returns: instance of :class:`ShareInfo` with the share info
             or False if the operation failed
@@ -907,7 +907,6 @@ class Client(object):
                                     'path': path,
                                     'url': data_el.find('url').text,
                                     'token': data_el.find('token').text,
-                                    'name': data_el.find('name').text
                                 }
             )
         raise HTTPResponseError(res)

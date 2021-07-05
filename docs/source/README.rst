@@ -1,22 +1,15 @@
 ==================================
-Python client library for ownCloud
+Python client library for nextCloud
 ==================================
 
 .. image:: https://travis-ci.org/owncloud/pyocclient.svg?branch=master
     :target: https://travis-ci.org/owncloud/pyocclient
 
-This pure python library makes it possible to connect to an ownCloud instance
-and perform file, share and attribute operations.
-
-Please note that this is **not** a sync client implementation but a library
-that provides functions to abstract away HTTP calls for various ownCloud APIs.
-
-See the `ownCloud homepage <http://owncloud.org>`_ for more information about ownCloud.
+This is a fork of https://github.com/owncloud/pyocclient to provide compatibility with nextCloud
 
 Features
 ========
 
-Supports connecting to ownCloud 8.2, 9.0, 9.1 and newer.
 
 General information
 -------------------

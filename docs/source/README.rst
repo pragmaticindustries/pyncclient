@@ -2,10 +2,8 @@
 Python client library for nextCloud
 ==================================
 
-.. image:: https://travis-ci.org/owncloud/pyocclient.svg?branch=master
-    :target: https://travis-ci.org/owncloud/pyocclient
 
-This is a fork of https://github.com/owncloud/pyocclient to provide compatibility with nextCloud
+This is a fork of https://github.com/owncloud/pyocclient to provide compatibility with nextCloud, this client will not maintain compatibility to ownCloud.
 
 Features
 ========

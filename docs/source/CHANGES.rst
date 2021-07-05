@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.7
+--
+- Made initial changes for nextCloud compatibility
+
 0.6
 ---
 

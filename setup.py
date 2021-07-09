@@ -5,7 +5,7 @@
 from setuptools import setup
 import io
 
-version = '0.6'
+version = '0.7'
 
 long_description = (
     io.open('README.rst', encoding='utf-8').read()

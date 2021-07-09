@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ownCloud client library documentation
-=====================================
+nextCloud client library documentation
+======================================
 
 Contents:
 
@@ -12,7 +12,7 @@ Contents:
    :maxdepth: 4
 
    Description <README>
-   API Documentation <owncloud>
+   API Documentation <nextcloud_client>
    Contributors <CONTRIBUTORS>
 
 Indices and tables

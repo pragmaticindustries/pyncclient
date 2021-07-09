@@ -2,9 +2,9 @@
 #
 # vim: expandtab shiftwidth=4 softtabstop=4
 #
-"""ownCloud client module
+"""nextCloud client module
 
-Makes it possible to access files on a remote ownCloud instance,
+Makes it possible to access files on a remote nextCloud instance,
 share them or access application attributes.
 """
 
@@ -304,7 +304,7 @@ class FileInfo(object):
 
 
 class Client(object):
-    """ownCloud client"""
+    """nextCloud client"""
 
     OCS_BASEPATH = 'ocs/v1.php/'
     OCS_SERVICE_SHARE = 'apps/files_sharing/api/v1'
@@ -327,7 +327,7 @@ class Client(object):
     def __init__(self, url, **kwargs):
         """Instantiates a client
 
-        :param url: URL of the target ownCloud instance
+        :param url: URL of the target nextCloud instance
         :param verify_certs: True (default) to verify SSL certificates, False otherwise
         :param dav_endpoint_version: None (default) to force using a specific endpoint version
         instead of relying on capabilities
@@ -346,7 +346,7 @@ class Client(object):
         self._version = None
 
     def login(self, user_id, password):
-        """Authenticate to ownCloud.
+        """Authenticate to nextCloud.
         This will create a session on the server.
 
         :param user_id: user id
@@ -422,7 +422,7 @@ class Client(object):
                               {
                                   'xmlns:d': "DAV:",
                                   'xmlns:nc': "http://nextcloud.org/ns",
-                                  'xmlns:oc': "http://owncloud.org/ns"
+                                  'xmlns:oc': "http://nextcloud.org/ns"
                               })
             prop = ET.SubElement(root, 'd:prop')
             for p in properties:
@@ -457,7 +457,7 @@ class Client(object):
                               {
                                   'xmlns:d': "DAV:",
                                   'xmlns:nc': "http://nextcloud.org/ns",
-                                  'xmlns:oc': "http://owncloud.org/ns"
+                                  'xmlns:oc': "http://nextcloud.org/ns"
                               })
             prop = ET.SubElement(root, 'd:prop')
             for p in properties:
@@ -1298,7 +1298,7 @@ class Client(object):
         :param user: name of the user whom we want to share a file/folder
         :param perms (optional): permissions of the shared object
             defaults to read only (1)
-            http://doc.owncloud.org/server/6.0/admin_manual/sharing_api/index.html
+            https://docs.nextcloud.com/server/latest/developer_manual/client_apis/OCS/ocs-share-api.html
         :param remote_user (optional): True if it is a federated users
             defaults to False if it is a local user
         :returns: instance of :class:`ShareInfo` with the share info
@@ -1467,7 +1467,7 @@ class Client(object):
         :param group: name of the group with which we want to share a file/folder
         :param perms (optional): permissions of the shared object
             defaults to read only (1)
-            http://doc.owncloud.org/server/6.0/admin_manual/sharing_api/index.html
+            https://docs.nextcloud.com/server/latest/developer_manual/client_apis/OCS/ocs-share-api.html
         :returns: instance of :class:`ShareInfo` with the share info
             or False if the operation failed
         :raises: HTTPResponseError in case an HTTP error status was returned
@@ -1503,9 +1503,9 @@ class Client(object):
         raise HTTPResponseError(res)
 
     def get_config(self):
-        """Returns ownCloud config information
+        """Returns nextCloud config information
         :returns: array of tuples (key, value) for each information
-            e.g. [('version', '1.7'), ('website', 'ownCloud'), ('host', 'cloud.example.com'),
+            e.g. [('version', '1.7'), ('website', 'nextCloud'), ('host', 'cloud.example.com'),
             ('contact', ''), ('ssl', 'false')]
         :raises: HTTPResponseError in case an HTTP error status was returned
         """
@@ -1645,16 +1645,16 @@ class Client(object):
         return ena_apps
 
     def get_version(self):
-        """Gets the ownCloud version of the connected server
+        """Gets the nextCloud version of the connected server
 
-        :returns: ownCloud version as string
+        :returns: nextCloud version as string
         """
         if self._version is None:
             self._update_capabilities()
         return self._version
 
     def get_capabilities(self):
-        """Gets the ownCloud app capabilities
+        """Gets the nextCloud app capabilities
 
         :returns: capabilities dictionary that maps from
         app name to another dictionary containing the capabilities

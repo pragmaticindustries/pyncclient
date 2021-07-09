@@ -1,1 +1,4 @@
-docs/source/CONTRIBUTORS.rst
+Contributors
+============
+
+* Marco Mastasi <m.nastasi@pragmaticminds.de>

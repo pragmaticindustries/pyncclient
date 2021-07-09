@@ -5,7 +5,7 @@ import unittest
 from unittest_data_provider import data_provider
 import os
 import shutil
-import owncloud
+import nextcloud_client as nextcloud
 import datetime
 import time
 import tempfile
@@ -16,7 +16,7 @@ from config import Config
 
 def getSupportedDavVersion():
     # connect just to check supported DAV version
-    client = owncloud.Client(Config['owncloud_url'])
+    client = nextcloud.Client(Config['owncloud_url'])
     client.login(Config['owncloud_login'], Config['owncloud_password'])
 
     caps = client.get_capabilities()
@@ -56,7 +56,7 @@ class TestFileAccess(unittest.TestCase):
         self.temp_dir = tempfile.gettempdir() + '/pyocclient_test%s-%s/' % (int(time.time()), random.randint(1, 1000))
         os.mkdir(self.temp_dir)
 
-        self.client = owncloud.Client(Config['owncloud_url'], dav_endpoint_version=self.get_dav_endpoint_version())
+        self.client = nextcloud.Client(Config['owncloud_url'], dav_endpoint_version=self.get_dav_endpoint_version())
         self.client.login(Config['owncloud_login'], Config['owncloud_password'])
         self.test_root = Config['test_root']
         if not self.test_root[-1] == '/':
@@ -135,7 +135,7 @@ class TestFileAccess(unittest.TestCase):
         self.assertTrue(self.client.put_file_contents(self.test_root + file_name, content))
 
         file_info = self.client.file_info(self.test_root + file_name)
-        self.assertTrue(isinstance(file_info, owncloud.FileInfo))
+        self.assertTrue(isinstance(file_info, nextcloud.FileInfo))
         self.assertEqual(file_info.get_name(), file_name)
         self.assertEqual(file_info.get_path() + '/', self.test_root)
         self.assertEqual(file_info.get_size(), len(content))
@@ -145,7 +145,7 @@ class TestFileAccess(unittest.TestCase):
         self.assertFalse(file_info.is_dir())
 
         dir_info = self.client.file_info(self.test_root + subdir)
-        self.assertTrue(isinstance(dir_info, owncloud.FileInfo))
+        self.assertTrue(isinstance(dir_info, nextcloud.FileInfo))
         self.assertEqual(dir_info.get_name(), subdir)
         self.assertEqual(file_info.get_path() + '/', self.test_root)
         self.assertIsNone(dir_info.get_size())
@@ -171,7 +171,7 @@ class TestFileAccess(unittest.TestCase):
             'oc:owner-id',
             'oc:owner-display-name'
         ])
-        self.assertTrue(isinstance(file_info, owncloud.FileInfo))
+        self.assertTrue(isinstance(file_info, nextcloud.FileInfo))
         self.assertEqual(file_info.get_name(), file_name)
         self.assertEqual(file_info.get_path() + '/', self.test_root)
         self.assertEqual(file_info.get_size(), len(content))
@@ -179,9 +179,9 @@ class TestFileAccess(unittest.TestCase):
         self.assertEqual(file_info.get_content_type(), 'text/plain')
         self.assertTrue(type(file_info.get_last_modified()) is datetime.datetime)
         self.assertFalse(file_info.is_dir())
-        self.assertIsNotNone(file_info.attributes['{http://owncloud.org/ns}favorite'])
-        self.assertIsNotNone(file_info.attributes['{http://owncloud.org/ns}owner-id'])
-        self.assertIsNotNone(file_info.attributes['{http://owncloud.org/ns}owner-display-name'])
+        self.assertIsNotNone(file_info.attributes['{http://nextcloud.org/ns}favorite'])
+        self.assertIsNotNone(file_info.attributes['{http://nextcloud.org/ns}owner-id'])
+        self.assertIsNotNone(file_info.attributes['{http://nextcloud.org/ns}owner-display-name'])
 
         dir_info = self.client.file_info(self.test_root + subdir, [
             'd:getlastmodified',
@@ -193,7 +193,7 @@ class TestFileAccess(unittest.TestCase):
             'oc:owner-id',
             'oc:owner-display-name'
         ])
-        self.assertTrue(isinstance(dir_info, owncloud.FileInfo))
+        self.assertTrue(isinstance(dir_info, nextcloud.FileInfo))
         self.assertEqual(dir_info.get_name(), subdir)
         self.assertEqual(file_info.get_path() + '/', self.test_root)
         self.assertIsNone(dir_info.get_size())
@@ -201,13 +201,13 @@ class TestFileAccess(unittest.TestCase):
         self.assertEqual(dir_info.get_content_type(), 'httpd/unix-directory')
         self.assertTrue(type(dir_info.get_last_modified()) is datetime.datetime)
         self.assertTrue(dir_info.is_dir())
-        self.assertIsNotNone(dir_info.attributes['{http://owncloud.org/ns}favorite'])
-        self.assertIsNotNone(dir_info.attributes['{http://owncloud.org/ns}owner-id'])
-        self.assertIsNotNone(dir_info.attributes['{http://owncloud.org/ns}owner-display-name'])
+        self.assertIsNotNone(dir_info.attributes['{http://nextcloud.org/ns}favorite'])
+        self.assertIsNotNone(dir_info.attributes['{http://nextcloud.org/ns}owner-id'])
+        self.assertIsNotNone(dir_info.attributes['{http://nextcloud.org/ns}owner-display-name'])
 
     def test_get_file_info_non_existing(self):
         """Test getting file info for non existing file"""
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.file_info(self.test_root + 'unexist')
         self.assertEqual(e.exception.status_code, 404)
 
@@ -271,14 +271,14 @@ class TestFileAccess(unittest.TestCase):
         self.assertFalse(listing[3].is_dir())
 
         for i in range(5):
-            self.assertIsNotNone(listing[i].attributes['{http://owncloud.org/ns}favorite'])
-            self.assertIsNotNone(listing[i].attributes['{http://owncloud.org/ns}owner-id'])
-            self.assertIsNotNone(listing[i].attributes['{http://owncloud.org/ns}owner-display-name'])
+            self.assertIsNotNone(listing[i].attributes['{http://nextcloud.org/ns}favorite'])
+            self.assertIsNotNone(listing[i].attributes['{http://nextcloud.org/ns}owner-id'])
+            self.assertIsNotNone(listing[i].attributes['{http://nextcloud.org/ns}owner-display-name'])
 
 
     def test_get_file_listing_non_existing(self):
         """Test getting file listing for non existing directory"""
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.list(self.test_root + 'unexist')
         self.assertEqual(e.exception.status_code, 404)
 
@@ -396,7 +396,7 @@ class TestFileAccess(unittest.TestCase):
         self.assertTrue(self.client.mkdir(self.test_root + subdir))
         self.assertTrue(self.client.put_file_contents(self.test_root + subdir + '/' + file_name, content))
         self.assertTrue(self.client.delete(self.test_root + subdir + '/' + file_name))
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.file_info(self.test_root + subdir + '/' + file_name)
         self.assertEqual(e.exception.status_code, 404)
 
@@ -406,10 +406,10 @@ class TestFileAccess(unittest.TestCase):
         self.assertTrue(self.client.mkdir(self.test_root + subdir))
         self.assertTrue(self.client.put_file_contents(self.test_root + subdir + '/' + file_name, content))
         self.assertTrue(self.client.delete(self.test_root + subdir))
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.file_info(self.test_root + subdir + '/' + file_name)
         self.assertEqual(e.exception.status_code, 404)
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.file_info(self.test_root + subdir)
         self.assertEqual(e.exception.status_code, 404)
 
@@ -575,7 +575,7 @@ class TestFileAccess(unittest.TestCase):
                 'x'
             )
         )
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.move(
                 self.test_root + 'move not possible.txt',
                 self.test_root + 'non-existing-dir/subdir/x.txt'
@@ -692,7 +692,7 @@ class TestFileAccess(unittest.TestCase):
                 'x'
             )
         )
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.copy(
                 self.test_root + 'copy not possible.txt',
                 self.test_root + 'non-existing-dir/subdir/x.txt'
@@ -716,7 +716,7 @@ class TestFileAccess(unittest.TestCase):
         share_info = self.client.share_file_with_link(path, public_upload=False, password='AnvvsP1234', name='Test Link')
 
         self.assertTrue(self.client.is_shared(path))
-        self.assertTrue(isinstance(share_info, owncloud.ShareInfo))
+        self.assertTrue(isinstance(share_info, nextcloud.ShareInfo))
         self.assertTrue(type(share_info.get_id()) is int)
         self.assertEqual(share_info.get_path(), path)
         self.assertEqual(share_info.get_name(), 'Test Link')
@@ -725,7 +725,7 @@ class TestFileAccess(unittest.TestCase):
 
     def test_share_with_link_non_existing_file(self):
         """Test sharing a file with link"""
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.share_file_with_link(self.test_root + 'unexist.txt')
         self.assertEqual(e.exception.status_code, 404)
 
@@ -739,12 +739,12 @@ class TestFileAccess(unittest.TestCase):
         share_info = self.client.share_file_with_user(path, self.share2user)
 
         self.assertTrue(self.client.is_shared(path))
-        self.assertTrue(isinstance(share_info, owncloud.ShareInfo))
+        self.assertTrue(isinstance(share_info, nextcloud.ShareInfo))
         self.assertEqual(share_info.get_path(), path)
         self.assertTrue(type(share_info.get_id()) is int)
         self.assertEqual(share_info.get_permissions(), 1)
 
-        shareclient = owncloud.Client(Config['owncloud_url'])
+        shareclient = nextcloud.Client(Config['owncloud_url'])
         shareclient.login(self.share2user, self.share2userPwd)
         share2_info = shareclient.get_shares(
             "/", shared_with_me=True)[0].share_info
@@ -764,7 +764,7 @@ class TestFileAccess(unittest.TestCase):
         share_info = self.client.share_file_with_group(path, self.test_group, perms=31)
 
         self.assertTrue(self.client.is_shared(path))
-        self.assertTrue(isinstance(share_info, owncloud.ShareInfo))
+        self.assertTrue(isinstance(share_info, nextcloud.ShareInfo))
         self.assertEqual(share_info.get_path(), path)
         self.assertTrue(type(share_info.get_id()) is int)
         self.assertEqual(share_info.get_permissions(), 31)
@@ -785,7 +785,7 @@ class TestFileAccess(unittest.TestCase):
 
     def test_is_shared_non_existing_path(self):
         """Test is_shared - path does not exist"""
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.is_shared(self.test_root + 'does_not_exist')
         self.assertEqual(e.exception.status_code, 404)
 
@@ -817,7 +817,7 @@ class TestFileAccess(unittest.TestCase):
             perms=self.client.OCS_PERMISSION_READ | self.client.OCS_PERMISSION_SHARE
         )
         sinfo = self.client.get_share(sinfo_run.get_id())
-        self.assertIsInstance(sinfo, owncloud.ShareInfo)
+        self.assertIsInstance(sinfo, nextcloud.ShareInfo)
         share_id = sinfo.get_id()
         self.assertGreater(share_id, 0)
         self.assertEqual(sinfo_run.get_id(), share_id)
@@ -843,7 +843,7 @@ class TestFileAccess(unittest.TestCase):
 
         sinfo_run = self.client.share_file_with_link(path)
         sinfo = self.client.get_share(sinfo_run.get_id())
-        self.assertIsInstance(sinfo, owncloud.ShareInfo)
+        self.assertIsInstance(sinfo, nextcloud.ShareInfo)
         self.assertIsNotNone(sinfo)
         share_id = sinfo.get_id()
         self.assertGreater(share_id, 0)
@@ -861,13 +861,13 @@ class TestFileAccess(unittest.TestCase):
 
     def test_get_share_non_existing(self):
         """Test get_share - share with specified id does not exist"""
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.get_share(-1)
         self.assertEqual(e.exception.status_code, 404)
 
     def test_get_shares_non_existing_path(self):
         """Test get_shares - path does not exist"""
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.get_shares(self.test_root + 'does_not_exist')
         self.assertEqual(e.exception.status_code, 404)
 
@@ -882,7 +882,7 @@ class TestFileAccess(unittest.TestCase):
         self.assertIsInstance(shares, list)
 
         shares = None
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             shares = self.client.get_shares(self.test_root + file_name, subfiles=True)
         self.assertIsNone(shares)
         self.assertEqual(e.exception.status_code, 400)
@@ -987,7 +987,7 @@ class TestPrivateDataAccess(unittest.TestCase):
         )
 
     def setUp(self):
-        self.client = owncloud.Client(Config['owncloud_url'])
+        self.client = nextcloud.Client(Config['owncloud_url'])
         self.client.login(Config['owncloud_login'], Config['owncloud_password'])
         self.app_name = Config['app_name']
 
@@ -1037,7 +1037,7 @@ class TestPrivateDataAccess(unittest.TestCase):
 class TestUserAndGroupActions(unittest.TestCase):
 
     def setUp(self):
-        self.client = owncloud.Client(Config['owncloud_url'])
+        self.client = nextcloud.Client(Config['owncloud_url'])
         self.client.login(Config['owncloud_login'], Config['owncloud_password'])
         self.groups_to_create = Config['groups_to_create']
         self.not_existing_group = Config['not_existing_group']
@@ -1048,7 +1048,7 @@ class TestUserAndGroupActions(unittest.TestCase):
             self.apps = self.client.get_apps()
             if not self.apps['provisioning_api']:
                 raise unittest.SkipTest("no API")
-        except owncloud.ResponseError:
+        except nextcloud.ResponseError:
             raise unittest.SkipTest("no API")
 
         try:
@@ -1124,20 +1124,20 @@ class TestUserAndGroupActions(unittest.TestCase):
         self.assertEqual(self.client.get_user('ghost_user')['email'], 'test@inf.org')
         self.client.delete_user('ghost_user')
 
-        with self.assertRaises(owncloud.OCSResponseError) as e:
+        with self.assertRaises(nextcloud.OCSResponseError) as e:
             self.client.set_user_attribute(self.share2user,'email',"äöüää_sfsdf+$%/)%&=")
         self.assertEqual(e.exception.status_code, 102)
         #try to catch with general ResponseError
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.set_user_attribute(self.share2user,'email',"äöüää_sfsdf+$%/)%&=")
         self.assertEqual(e.exception.status_code, 102)
 
     def test_create_existing_user(self):
-        with self.assertRaises(owncloud.OCSResponseError) as e:
+        with self.assertRaises(nextcloud.OCSResponseError) as e:
             self.client.create_user(self.share2user, self.share2userPwd)
         self.assertEqual(e.exception.status_code, 102)
         # try to catch with general ResponseError
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.create_user(self.share2user, self.share2userPwd)
         self.assertEqual(e.exception.status_code, 102)
 
@@ -1146,11 +1146,11 @@ class TestUserAndGroupActions(unittest.TestCase):
             self.assertTrue(self.client.create_group(group))
             self.assertTrue(self.client.group_exists(group))
             # try to create them again, that should raise and OCSResponseError with code 102
-            with self.assertRaises(owncloud.OCSResponseError) as e:
+            with self.assertRaises(nextcloud.OCSResponseError) as e:
                 self.client.create_group(group)
             self.assertEqual(e.exception.status_code, 102)
             #try to catch with general ResponseError
-            with self.assertRaises(owncloud.ResponseError) as e:
+            with self.assertRaises(nextcloud.ResponseError) as e:
                 self.client.create_group(group)
             self.assertEqual(e.exception.status_code, 102)
 
@@ -1178,11 +1178,11 @@ class TestUserAndGroupActions(unittest.TestCase):
         self.assertTrue(self.client.user_is_in_group(self.share2user,self.test_group))
 
         # try to add the user to a not existing group, that should raise and OCSResponseError with code 102
-        with self.assertRaises(owncloud.OCSResponseError) as e:
+        with self.assertRaises(nextcloud.OCSResponseError) as e:
             self.client.add_user_to_group(self.share2user,self.not_existing_group)
         self.assertEqual(e.exception.status_code, 102)
         # try to catch with general ResponseError
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.add_user_to_group(self.share2user,self.not_existing_group)
         self.assertEqual(e.exception.status_code, 102)
 
@@ -1190,21 +1190,21 @@ class TestUserAndGroupActions(unittest.TestCase):
         self.assertFalse(self.client.user_is_in_group(self.share2user,self.test_group))
 
         # try to remove the user from a not existing group, that should raise and OCSResponseError with code 102
-        with self.assertRaises(owncloud.OCSResponseError) as e:
+        with self.assertRaises(nextcloud.OCSResponseError) as e:
             self.client.remove_user_from_group(self.share2user,self.not_existing_group)
         self.assertEqual(e.exception.status_code, 102)
         # try to catch with general ResponseError
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.client.remove_user_from_group(self.share2user,self.not_existing_group)
         self.assertEqual(e.exception.status_code, 102)
 
         # try to remove user without giving group name
-        with self.assertRaises(owncloud.OCSResponseError) as e:
+        with self.assertRaises(nextcloud.OCSResponseError) as e:
             self.client.remove_user_from_group(self.share2user,'')
         self.assertEqual(e.exception.status_code, 101)
 
         # try to remove not existing user from a group
-        with self.assertRaises(owncloud.OCSResponseError) as e:
+        with self.assertRaises(nextcloud.OCSResponseError) as e:
             self.client.remove_user_from_group("iGuessThisUserNameDoesNotExistInTheSystem",self.test_group)
         self.assertEqual(e.exception.status_code, 103)
 
@@ -1212,7 +1212,7 @@ class TestUserAndGroupActions(unittest.TestCase):
 class TestApps(unittest.TestCase):
 
     def setUp(self):
-        self.client = owncloud.Client(Config['owncloud_url'])
+        self.client = nextcloud.Client(Config['owncloud_url'])
         self.client.login(Config['owncloud_login'], Config['owncloud_password'])
 
     def test_enable_app_disable_app(self):
@@ -1226,7 +1226,7 @@ class TestApps(unittest.TestCase):
 class TestGetConfig(unittest.TestCase):
 
     def setUp(self):
-        self.client = owncloud.Client(Config['owncloud_url'])
+        self.client = nextcloud.Client(Config['owncloud_url'])
         self.client.login(Config['owncloud_login'], Config['owncloud_password'])
 
     def test_get_config(self):
@@ -1255,10 +1255,10 @@ class TestGetConfig(unittest.TestCase):
 class TestLogin(unittest.TestCase):
 
     def setUp(self):
-        self.client = owncloud.Client(Config['owncloud_url'])
+        self.client = nextcloud.Client(Config['owncloud_url'])
 
     def test_login(self):
-        with self.assertRaises(owncloud.HTTPResponseError) as e:
+        with self.assertRaises(nextcloud.HTTPResponseError) as e:
             self.client.login("iGuessThisUserNameDoesNotExistInTheSystem","iGuessThisUserNameDoesNotExistInTheSystem")
         self.assertEqual(e.exception.status_code, 401)
         self.client.login(Config['owncloud_login'], Config['owncloud_password'])
@@ -1270,7 +1270,7 @@ class TestLogin(unittest.TestCase):
 class TestOCSRequest(unittest.TestCase):
 
     def setUp(self):
-        self.client = owncloud.Client(Config['owncloud_url'])
+        self.client = nextcloud.Client(Config['owncloud_url'])
         self.client.login(Config['owncloud_login'], Config['owncloud_password'])
 
     def test_make_request(self):
@@ -1288,7 +1288,7 @@ class TestOCSRequest(unittest.TestCase):
         kwargs = {
             'accepted_codes': [102]
         }
-        with self.assertRaises(owncloud.OCSResponseError) as e:
+        with self.assertRaises(nextcloud.OCSResponseError) as e:
             self.client.make_ocs_request(
                 'GET',
                 '',
@@ -1324,7 +1324,7 @@ class TestPublicFolder(unittest.TestCase):
         self.temp_dir = tempfile.gettempdir() + '/pyocclient_test%s-%s/' % (int(time.time()), random.randint(1, 1000))
         os.mkdir(self.temp_dir)
 
-        self.client = owncloud.Client(Config['owncloud_url'], dav_endpoint_version=self.get_dav_endpoint_version())
+        self.client = nextcloud.Client(Config['owncloud_url'], dav_endpoint_version=self.get_dav_endpoint_version())
         self.client.login(Config['owncloud_login'], Config['owncloud_password'])
         self.test_root = Config['test_root']
         if not self.test_root[-1] == '/':
@@ -1406,76 +1406,76 @@ class TestPublicFolder(unittest.TestCase):
         file_handle.close()
 
     def test_anon_login(self):
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.public_download_token)
         listing = self.anon_client.list('/')
         self.assertEqual(len(listing), 1)
 
         # repeat with wrong token
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login('badtoken')
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.anon_client.list('/')
         self.assertEqual(e.exception.status_code, 401)
 
         # repeat with upload only folder (listing not allowed)
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.public_upload_token)
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.anon_client.list('/')
         self.assertEqual(e.exception.status_code, 404)
     
     def test_anon_login_pw(self):
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.pw_public_download_token, folder_password=self.folder_password)
         listing = self.anon_client.list('/')
         self.assertEqual(len(listing), 1)
 
         # repeat with wrong password
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.pw_public_download_token, folder_password='wrongpassword')
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.anon_client.list('/')
         self.assertEqual(e.exception.status_code, 401)
 
         # repeat with upload only folder (listing not allowed)
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.pw_public_upload_token, folder_password=self.folder_password)
-        with self.assertRaises(owncloud.ResponseError) as e:
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.anon_client.list('/')
         self.assertEqual(e.exception.status_code, 404)
 
     def test_from_link(self):
-        self.anon_client = owncloud.Client.from_public_link(self.public_download_link)
+        self.anon_client = nextcloud.Client.from_public_link(self.public_download_link)
         listing = self.anon_client.list('/')
         self.assertEqual(len(listing), 1)
 
         # repeat with wrong link
-        self.anon_client = owncloud.Client.from_public_link(Config['owncloud_url'] + 'index.php/s/wronglink')
-        with self.assertRaises(owncloud.ResponseError) as e:
+        self.anon_client = nextcloud.Client.from_public_link(Config['owncloud_url'] + 'index.php/s/wronglink')
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.anon_client.list('/')
         self.assertEqual(e.exception.status_code, 401)
 
         # repeat with upload only folder (listing not allowed)
-        self.anon_client = owncloud.Client.from_public_link(self.public_upload_link)
-        with self.assertRaises(owncloud.ResponseError) as e:
+        self.anon_client = nextcloud.Client.from_public_link(self.public_upload_link)
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.anon_client.list('/')
         self.assertEqual(e.exception.status_code, 404)
     
     def test_from_link_pw(self):
-        self.anon_client = owncloud.Client.from_public_link(self.pw_public_download_link, folder_password=self.folder_password)
+        self.anon_client = nextcloud.Client.from_public_link(self.pw_public_download_link, folder_password=self.folder_password)
         listing = self.anon_client.list('/')
         self.assertEqual(len(listing), 1)
 
         # repeat with wrong password
-        self.anon_client = owncloud.Client.from_public_link(self.pw_public_download_link, folder_password='wrongpassword')
-        with self.assertRaises(owncloud.ResponseError) as e:
+        self.anon_client = nextcloud.Client.from_public_link(self.pw_public_download_link, folder_password='wrongpassword')
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.anon_client.list('/')
         self.assertEqual(e.exception.status_code, 401)
 
         # repeat with upload only folder (listing not allowed)
-        self.anon_client = owncloud.Client.from_public_link(self.pw_public_upload_link, folder_password=self.folder_password)
-        with self.assertRaises(owncloud.ResponseError) as e:
+        self.anon_client = nextcloud.Client.from_public_link(self.pw_public_upload_link, folder_password=self.folder_password)
+        with self.assertRaises(nextcloud.ResponseError) as e:
             self.anon_client.list('/')
         self.assertEqual(e.exception.status_code, 404)             
 
@@ -1487,7 +1487,7 @@ class TestPublicFolder(unittest.TestCase):
         temp_file = self.temp_dir + file_name
         self.client.put_file_contents(self.public_folder_download + '/' + file_name, content)
 
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.public_download_token)
 
         self.assertTrue(self.anon_client.get_file('/' + file_name, temp_file))
@@ -1504,7 +1504,7 @@ class TestPublicFolder(unittest.TestCase):
     @data_provider(files_content)
     def test_mkdir(self, file_name, content, subdir):
         """Test subdirectory creation"""
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.public_upload_token)
 
         self.assertTrue(self.anon_client.mkdir(subdir))
@@ -1516,7 +1516,7 @@ class TestPublicFolder(unittest.TestCase):
         """Test simple upload"""
         temp_file = self.temp_dir + 'pyoctest.dat'
         self.__create_file(temp_file, 2 * 1024)
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.public_upload_token)
 
         self.assertTrue(self.anon_client.put_file('/' + file_name, temp_file, chunked=False))
@@ -1532,7 +1532,7 @@ class TestPublicFolder(unittest.TestCase):
         temp_file = self.temp_dir + 'pyoctest.dat'
         self.__create_file(temp_file, 10 * 1024 * 1024)
 
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.public_upload_token)
 
         self.assertTrue(self.anon_client.put_file('/' + file_name, temp_file))
@@ -1547,7 +1547,7 @@ class TestPublicFolder(unittest.TestCase):
         """Test convinience wrapper"""
         temp_file = self.temp_dir + file_name
         self.__create_file(temp_file, 2 * 1024)
-        self.anon_client = owncloud.Client(Config['owncloud_url'])
+        self.anon_client = nextcloud.Client(Config['owncloud_url'])
         self.anon_client.anon_login(self.public_upload_token)
 
         self.assertTrue(self.anon_client.drop_file(temp_file))

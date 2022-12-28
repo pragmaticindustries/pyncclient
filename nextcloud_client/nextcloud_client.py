@@ -332,6 +332,9 @@ class Client(object):
         :param dav_endpoint_version: None (default) to force using a specific endpoint version
         instead of relying on capabilities
         :param debug: set to True to print debugging messages to stdout, defaults to False
+        :param retry_on_error: False(default) set to True to resend chunk on connection error
+        :param retry_attempts: 5(default) How many attempts to resend chunk
+        :param show_progress: Show upload % progress, default False
         """
         if not url.endswith('/'):
             url += '/'
@@ -341,6 +344,9 @@ class Client(object):
         self._debug = kwargs.get('debug', False)
         self._verify_certs = kwargs.get('verify_certs', True)
         self._dav_endpoint_version = kwargs.get('dav_endpoint_version', True)
+        self._retry_on_error = kwargs.get('retry_on_error',False)
+        self._retry_attempts = kwargs.get('retry_attempts',5)
+        self._show_progress  = kwargs.get('show_progress',False)
 
         self._capabilities = None
         self._version = None
@@ -677,7 +683,8 @@ class Client(object):
                               chunk_index)
             else:
                 chunk_name = remote_path
-
+            if self._show_progress and chunk_index % 2 == 0:
+                print(f"Progress {int(100*chunk_index/int(chunk_count))} % {chunk_index}/{chunk_count}")
             if not self._make_dav_request(
                     'PUT',
                     chunk_name,
@@ -1800,11 +1807,27 @@ class Client(object):
                 print('Headers: ', kwargs.get('headers'))
 
         path = self._normalize_path(path)
-        res = self._session.request(
-            method,
-            self._webdav_url + parse.quote(self._encode_string(path)),
-            **kwargs
-        )
+        try:
+            res = self._session.request(
+                        method,
+                        self._webdav_url + parse.quote(self._encode_string(path)),
+                        **kwargs
+                    )
+        except requests.exceptions.ConnectionError as e:
+            if self._retry_on_error:
+                for i in range(0,self._retry_attempts):
+                    try:
+                        res = self._session.request(
+                            method,
+                            self._webdav_url + parse.quote(self._encode_string(path)),
+                            **kwargs
+                        )
+                    except requests.exceptions.ConnectionError as e:
+                        print(f"{path} => {e} occured. Resend {i} times")
+                        time.sleep(1)
+                        continue
+                    finally:
+                        break
         if self._debug:
             print('DAV status: %i' % res.status_code)
         if res.status_code in [200, 207]:
